@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Div Focus Detection Demo</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+
+    #focusDiv {
+      border: 2px solid #333;
+      padding: 20px;
+      margin-bottom: 20px;
+      outline: none;
+    }
+
+    #focusDiv:focus-within {
+      border-color: #007bff;
+      background: #eef5ff;
+    }
+
+    #focusDiv button,
+    #focusDiv input {
+      margin: 5px 0;
+      display: block;
+    }
+
+    #log {
+      border: 1px solid #ccc;
+      padding: 10px;
+      height: 220px;
+      overflow-y: auto;
+      font-family: monospace;
+      background: #f9f9f9;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Focusable Div with Buttons & Textbox</h1>
+
+  <p>
+    Click inside the box and interact with the buttons or text input.
+    <br>
+    Then switch tabs or applications to observe the detection.
+  </p>
+
+  <div id="focusDiv" tabindex="0">
+    <strong>Interactive Area</strong>
+
+    <button id="btn1">Button 1</button>
+    <button id="btn2">Button 2</button>
+
+    <input
+      id="textInput"
+      type="text"
+      placeholder="Type something here..."
+    />
+  </div>
+
+  <h3>Event Log</h3>
+  <div id="log"></div>
+
+  <script>
+    const focusDiv = document.getElementById("focusDiv");
+    const log = document.getElementById("log");
+    const btn1 = document.getElementById("btn1");
+    const btn2 = document.getElementById("btn2");
+    const textInput = document.getElementById("textInput");
+
+    let divActive = false;
+
+    function addLog(message) {
+      const time = new Date().toLocaleTimeString();
+      log.innerHTML += `[${time}] ${message}<br>`;
+      log.scrollTop = log.scrollHeight;
+    }
+
+    // Track focus within the div (including children)
+    focusDiv.addEventListener("focusin", () => {
+      if (!divActive) {
+        divActive = true;
+        addLog("Div focused (or child focused)");
+      }
+    });
+
+    focusDiv.addEventListener("focusout", (e) => {
+      // Check if focus actually left the entire div
+      if (!focusDiv.contains(e.relatedTarget)) {
+        divActive = false;
+        addLog("Div unfocused (focus left div)");
+      }
+    });
+
+    // Button interactions
+    btn1.addEventListener("click", () => {
+      addLog("Button 1 clicked");
+    });
+
+    btn2.addEventListener("click", () => {
+      addLog("Button 2 clicked");
+    });
+
+    // Text input typing
+    textInput.addEventListener("input", (e) => {
+      addLog(`Textbox input: "${e.target.value}"`);
+    });
+
+    // Tab visibility change
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) {
+        addLog(
+          divActive
+            ? "Tab hidden while interacting with div"
+            : "Tab hidden"
+        );
+      } else {
+        addLog("Tab visible again");
+      }
+    });
+
+    // Window focus / blur
+    window.addEventListener("blur", () => {
+      addLog(
+        divActive
+          ? "Window lost focus while interacting with div"
+          : "Window lost focus"
+      );
+    });
+
+    window.addEventListener("focus", () => {
+      addLog("Window focused");
+    });
+  </script>
+
+</body>
+</html>
